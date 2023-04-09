@@ -1,12 +1,21 @@
+use anyhow::{Context, Result};
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+use std::fs::read_to_string;
+
 const LETTERS_PER_SIDE: usize = 4;
+
+lazy_static! {
+    static ref DICTIONARY: HashMap<String, ()> =
+        load_dictionary("./data/words.txt").expect("error while loading dictionary");
+}
 
 type LetterCoord = (usize, usize);
 type Side = [char; LETTERS_PER_SIDE];
 type Triangle = [Side; 3];
 
 fn word_exists(word: &str) -> bool {
-    // TODO: implement dictionary search
-    true
+    DICTIONARY.contains_key(word)
 }
 
 #[derive(Debug)]
@@ -68,7 +77,7 @@ impl Solution {
     }
 }
 
-fn main() {
+fn main() -> Result<()> {
     let a = ['t', 'n', 'w', 'u'];
     let b = ['m', 'y', 'o', 'p'];
     let c = ['q', 'a', 'i', 's'];
@@ -78,4 +87,16 @@ fn main() {
     solution.add_letter((0, 1));
     solution.enter_word();
     println!("{solution:#?}");
+
+    Ok(())
 }
+
+fn load_dictionary(path: &str) -> Result<HashMap<String, ()>> {
+    let contents = read_to_string(path)?;
+
+    Ok(contents
+        .lines()
+        .map(|line| (line.to_owned(), ()))
+        .collect::<HashMap<String, ()>>())
+}
+
